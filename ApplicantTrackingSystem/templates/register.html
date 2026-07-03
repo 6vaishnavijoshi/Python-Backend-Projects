@@ -1,41 +1,25 @@
-<!DOCTYPE html>
-<html>
-<head>
+<form method="POST">
 
-<title>Register</title>
+<input
+type="text"
+name="name"
+placeholder="Full Name"
+required>
 
-<link rel="stylesheet"
-href="{{ url_for('static', filename='css/style.css') }}">
+<input
+type="email"
+name="email"
+placeholder="Email"
+required>
 
-</head>
+<input
+type="password"
+name="password"
+placeholder="Password"
+required>
 
-<body>
-
-<nav>
-
-<a href="/">Home</a>
-<a href="/login">Login</a>
-<a href="/register">Register</a>
-
-</nav>
-
-<div class="container">
-
-<h1>Create Account</h1>
-
-<form>
-
-<input type="text" placeholder="Full Name">
-
-<input type="email" placeholder="Email">
-
-<input type="password" placeholder="Password">
-
-<button>Register</button>
+<button type="submit">
+Register
+</button>
 
 </form>
-
-</div>
-
-</body>
-</html>
