@@ -1,42 +1,54 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for, session
 from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 
-# Create Flask application
+# -------------------------------
+# Create Flask App
+# -------------------------------
 app = Flask(__name__)
 
-# Configure SQLite Database
+# Secret Key for Sessions
+app.secret_key = "ATS_Project_2026"
+
+# SQLite Database Configuration
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 # Initialize Database
 db = SQLAlchemy(app)
 
-# -------------------------
+# -------------------------------
 # Database Model
-# -------------------------
+# -------------------------------
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+
     name = db.Column(db.String(100), nullable=False)
+
     email = db.Column(db.String(100), unique=True, nullable=False)
-    password = db.Column(db.String(100), nullable=False)
+
+    password = db.Column(db.String(255), nullable=False)
 
     def __repr__(self):
         return f"<User {self.name}>"
 
-# Create database and tables
+
+# Create Database
 with app.app_context():
     db.create_all()
 
-# -------------------------
+
+# -------------------------------
 # Home Page
-# -------------------------
+# -------------------------------
 @app.route("/")
 def home():
     return render_template("index.html")
 
-# -------------------------
-# Register Page
-# -------------------------
+
+# -------------------------------
+# Register
+# -------------------------------
 @app.route("/register", methods=["GET", "POST"])
 def register():
 
@@ -46,30 +58,34 @@ def register():
         email = request.form["email"]
         password = request.form["password"]
 
-        # Check if email already exists
+        # Check duplicate email
         existing_user = User.query.filter_by(email=email).first()
 
         if existing_user:
-            return "Email already registered!"
+            return "Email already exists!"
 
-        # Create new user
+        # Hash Password
+        hashed_password = generate_password_hash(password)
+
+        # Create User
         new_user = User(
             name=name,
             email=email,
-            password=password
+            password=hashed_password
         )
 
-        # Save user
+        # Save to Database
         db.session.add(new_user)
         db.session.commit()
 
-        return "Registration Successful!"
+        return redirect(url_for("login"))
 
     return render_template("register.html")
 
-# -------------------------
-# Login Page
-# -------------------------
+
+# -------------------------------
+# Login
+# -------------------------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
 
@@ -78,20 +94,48 @@ def login():
         email = request.form["email"]
         password = request.form["password"]
 
-        user = User.query.filter_by(
-            email=email,
-            password=password
-        ).first()
+        user = User.query.filter_by(email=email).first()
 
-        if user:
-            return f"Welcome {user.name}!"
+        if user and check_password_hash(user.password, password):
 
-        return "Invalid Email or Password"
+            session["user_id"] = user.id
+            session["user_name"] = user.name
+
+            return redirect(url_for("dashboard"))
+
+        else:
+            return "Invalid Email or Password"
 
     return render_template("login.html")
 
-# -------------------------
-# Run Application
-# -------------------------
+# -------------------------------
+# Dashboard
+# -------------------------------
+@app.route("/dashboard")
+def dashboard():
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    return render_template(
+        "dashboard.html",
+        name=session["user_name"]
+    )
+
+
+# -------------------------------
+# Logout
+# -------------------------------
+@app.route("/logout")
+def logout():
+
+    session.clear()
+
+    return redirect(url_for("login"))
+
+
+# -------------------------------
+# Run App
+# -------------------------------
 if __name__ == "__main__":
     app.run(debug=True)
