@@ -1,97 +1,136 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+import os
+from flask import (
+    Flask,
+    render_template,
+    request,
+    redirect,
+    url_for,
+    session,
+    flash
+)
+
 from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import generate_password_hash, check_password_hash
+
+from werkzeug.security import (
+    generate_password_hash,
+    check_password_hash
+)
+
+from werkzeug.utils import secure_filename
 
 # -------------------------------
-# Create Flask App
+# Flask Configuration
 # -------------------------------
+
 app = Flask(__name__)
 
-# Secret Key for Sessions
-app.secret_key = "ATS_Project_2026"
+app.config["SECRET_KEY"] = "mysecretkey"
 
-# SQLite Database Configuration
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
+
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-# Initialize Database
+UPLOAD_FOLDER = "uploads"
+
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
+ALLOWED_EXTENSIONS = {"pdf"}
+
 db = SQLAlchemy(app)
+
+# -------------------------------
+# Create Upload Folder
+# -------------------------------
+
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # -------------------------------
 # Database Model
 # -------------------------------
+
 class User(db.Model):
+
     id = db.Column(db.Integer, primary_key=True)
 
     name = db.Column(db.String(100), nullable=False)
 
     email = db.Column(db.String(100), unique=True, nullable=False)
 
-    password = db.Column(db.String(255), nullable=False)
+    password = db.Column(db.String(200), nullable=False)
 
-    def __repr__(self):
-        return f"<User {self.name}>"
+# -------------------------------
+# Database Creation
+# -------------------------------
 
-
-# Create Database
 with app.app_context():
     db.create_all()
 
+# -------------------------------
+# Helper Function
+# -------------------------------
+
+def allowed_file(filename):
+
+    return "." in filename and \
+           filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # -------------------------------
-# Home Page
+# Home
 # -------------------------------
+
 @app.route("/")
 def home():
-    return render_template("index.html")
 
+    return render_template("index.html")
 
 # -------------------------------
 # Register
 # -------------------------------
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
 
     if request.method == "POST":
 
         name = request.form["name"]
+
         email = request.form["email"]
+
         password = request.form["password"]
 
-        # Check duplicate email
         existing_user = User.query.filter_by(email=email).first()
 
         if existing_user:
-            return "Email already exists!"
 
-        # Hash Password
+            return "Email already registered."
+
         hashed_password = generate_password_hash(password)
 
-        # Create User
-        new_user = User(
+        user = User(
             name=name,
             email=email,
             password=hashed_password
         )
 
-        # Save to Database
-        db.session.add(new_user)
+        db.session.add(user)
+
         db.session.commit()
 
         return redirect(url_for("login"))
 
     return render_template("register.html")
 
-
 # -------------------------------
 # Login
 # -------------------------------
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
 
     if request.method == "POST":
 
         email = request.form["email"]
+
         password = request.form["password"]
 
         user = User.query.filter_by(email=email).first()
@@ -99,11 +138,13 @@ def login():
         if user and check_password_hash(user.password, password):
 
             session["user_id"] = user.id
+
             session["user_name"] = user.name
 
             return redirect(url_for("dashboard"))
 
         else:
+
             return "Invalid Email or Password"
 
     return render_template("login.html")
@@ -111,21 +152,74 @@ def login():
 # -------------------------------
 # Dashboard
 # -------------------------------
+
 @app.route("/dashboard")
 def dashboard():
 
     if "user_id" not in session:
+
         return redirect(url_for("login"))
+
+    files = os.listdir(app.config["UPLOAD_FOLDER"])
 
     return render_template(
         "dashboard.html",
-        name=session["user_name"]
+        name=session["user_name"],
+        files=files
     )
 
+# -------------------------------
+# Upload Resume
+# -------------------------------
+
+@app.route("/upload", methods=["GET", "POST"])
+def upload():
+
+    if "user_id" not in session:
+
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+
+        if "resume" not in request.files:
+
+            flash("No file selected")
+
+            return redirect(request.url)
+
+        file = request.files["resume"]
+
+        if file.filename == "":
+
+            flash("No file selected")
+
+            return redirect(request.url)
+
+        if file and allowed_file(file.filename):
+
+            filename = secure_filename(file.filename)
+
+            file.save(
+                os.path.join(
+                    app.config["UPLOAD_FOLDER"],
+                    filename
+                )
+            )
+
+            flash("Resume Uploaded Successfully!")
+
+            return redirect(url_for("dashboard"))
+
+        else:
+
+            flash("Only PDF files are allowed.")
+
+    return render_template("upload_resume.html")
 
 # -------------------------------
 # Logout
 # -------------------------------
+
 @app.route("/logout")
 def logout():
 
@@ -133,9 +227,10 @@ def logout():
 
     return redirect(url_for("login"))
 
+# -------------------------------
+# Run Application
+# -------------------------------
 
-# -------------------------------
-# Run App
-# -------------------------------
 if __name__ == "__main__":
+
     app.run(debug=True)
