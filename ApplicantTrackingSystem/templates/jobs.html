@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Jobs</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <nav>
+        <h2>Applicant Tracking System</h2>
+
+        <ul>
+            <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('add_job') }}">Add Job</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+
+        <h1>Available Jobs</h1>
+
+        {% if jobs %}
+
+            {% for job in jobs %}
+
+            <div class="card">
+
+                <h2>{{ job.title }}</h2>
+
+                <p><strong>Company:</strong> {{ job.company }}</p>
+
+                <p><strong>Location:</strong> {{ job.location }}</p>
+
+                <p><strong>Salary:</strong> {{ job.salary }}</p>
+
+                <p><strong>Description:</strong></p>
+
+                <p>{{ job.description }}</p>
+
+                <br>
+
+                <a href="{{ url_for('apply', job_id=job.id) }}">
+                    <button>
+                        Apply Now
+                    </button>
+                </a>
+
+            </div>
+
+            <br>
+
+            {% endfor %}
+
+        {% else %}
+
+            <div class="card">
+
+                <h2>No Jobs Available</h2>
+
+                <p>No job postings have been added yet.</p>
+
+                <a href="{{ url_for('add_job') }}">
+                    <button>Add First Job</button>
+                </a>
+
+            </div>
+
+        {% endif %}
+
+    </div>
+
+</body>
+
+</html>

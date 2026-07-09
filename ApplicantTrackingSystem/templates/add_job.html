@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Job</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <nav>
+        <h2>Applicant Tracking System</h2>
+
+        <ul>
+            <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('jobs') }}">View Jobs</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+
+        <div class="card">
+
+            <h1>Add New Job</h1>
+
+            <form action="{{ url_for('add_job') }}" method="POST">
+
+                <label>Job Title</label>
+
+                <input
+                    type="text"
+                    name="title"
+                    placeholder="Enter Job Title"
+                    required>
+
+                <label>Company Name</label>
+
+                <input
+                    type="text"
+                    name="company"
+                    placeholder="Enter Company Name"
+                    required>
+
+                <label>Location</label>
+
+                <input
+                    type="text"
+                    name="location"
+                    placeholder="Enter Job Location"
+                    required>
+
+                <label>Salary</label>
+
+                <input
+                    type="text"
+                    name="salary"
+                    placeholder="Example: ₹6 LPA"
+                    required>
+
+                <label>Job Description</label>
+
+                <textarea
+                    name="description"
+                    rows="6"
+                    placeholder="Enter Job Description"
+                    required></textarea>
+
+                <button type="submit">
+                    Add Job
+                </button>
+
+            </form>
+
+            <br>
+
+            <a href="{{ url_for('dashboard') }}">
+                ← Back to Dashboard
+            </a>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

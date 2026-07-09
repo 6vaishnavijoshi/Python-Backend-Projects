@@ -58,6 +58,30 @@ class User(db.Model):
 
     password = db.Column(db.String(200), nullable=False)
 
+
+class Job(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    title = db.Column(db.String(100), nullable=False)
+
+    company = db.Column(db.String(100), nullable=False)
+
+    location = db.Column(db.String(100), nullable=False)
+
+    salary = db.Column(db.String(50))
+
+    description = db.Column(db.Text)
+
+
+class Application(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    user_id = db.Column(db.Integer)
+
+    job_id = db.Column(db.Integer)
+
 # -------------------------------
 # Database Creation
 # -------------------------------
@@ -216,6 +240,81 @@ def upload():
 
     return render_template("upload_resume.html")
 
+
+# -------------------------------
+# Add Job
+# -------------------------------
+
+@app.route("/add_job", methods=["GET", "POST"])
+def add_job():
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+
+        title = request.form["title"]
+        company = request.form["company"]
+        location = request.form["location"]
+        salary = request.form["salary"]
+        description = request.form["description"]
+
+        new_job = Job(
+            title=title,
+            company=company,
+            location=location,
+            salary=salary,
+            description=description
+        )
+
+        db.session.add(new_job)
+        db.session.commit()
+
+        flash("Job Added Successfully!")
+
+        return redirect(url_for("jobs"))
+
+    return render_template("add_job.html")
+
+# -------------------------------
+# View Jobs
+# -------------------------------
+
+@app.route("/jobs")
+def jobs():
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    jobs = Job.query.all()
+
+    return render_template(
+        "jobs.html",
+        jobs=jobs
+    )
+
+
+# -------------------------------
+# Apply Job
+# -------------------------------
+
+@app.route("/apply/<int:job_id>")
+def apply(job_id):
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    application = Application(
+        user_id=session["user_id"],
+        job_id=job_id
+    )
+
+    db.session.add(application)
+    db.session.commit()
+
+    flash("Application Submitted Successfully!")
+
+    return redirect(url_for("jobs"))
 # -------------------------------
 # Logout
 # -------------------------------
