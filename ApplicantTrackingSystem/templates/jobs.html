@@ -45,12 +45,17 @@
 
                 <br>
 
-                <a href="{{ url_for('apply', job_id=job.id) }}">
-                    <button>
-                        Apply Now
-                    </button>
-                </a>
+                <div class="buttons">
 
+            <a href="{{ url_for('edit_job', job_id=job.id) }}">
+                <button>Edit</button>
+            </a>
+
+            <a href="{{ url_for('apply', job_id=job.id) }}">
+                <button>Apply Now</button>
+            </a>
+
+</div>
             </div>
 
             <br>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Edit Job</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<nav>
+
+<h2>Applicant Tracking System</h2>
+
+<ul>
+
+<li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+
+<li><a href="{{ url_for('jobs') }}">Jobs</a></li>
+
+<li><a href="{{ url_for('logout') }}">Logout</a></li>
+
+</ul>
+
+</nav>
+
+<div class="container">
+
+<h1>Edit Job</h1>
+
+<form method="POST">
+
+<label>Job Title</label>
+
+<input
+type="text"
+name="title"
+value="{{ job.title }}"
+required>
+
+<label>Company</label>
+
+<input
+type="text"
+name="company"
+value="{{ job.company }}"
+required>
+
+<label>Location</label>
+
+<input
+type="text"
+name="location"
+value="{{ job.location }}"
+required>
+
+<label>Salary</label>
+
+<input
+type="text"
+name="salary"
+value="{{ job.salary }}"
+required>
+
+<label>Description</label>
+
+<textarea
+name="description"
+rows="6"
+required>{{ job.description }}</textarea>
+
+<button type="submit">
+
+Update Job
+
+</button>
+
+</form>
+
+</div>
+
+</body>
+
+</html>

@@ -337,6 +337,38 @@ def my_applications():
         "my_applications.html",
         applications=applications
     )
+
+
+# -------------------------------
+# Edit Job
+# -------------------------------
+
+@app.route("/edit_job/<int:job_id>", methods=["GET", "POST"])
+def edit_job(job_id):
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    job = Job.query.get_or_404(job_id)
+
+    if request.method == "POST":
+
+        job.title = request.form["title"]
+        job.company = request.form["company"]
+        job.location = request.form["location"]
+        job.salary = request.form["salary"]
+        job.description = request.form["description"]
+
+        db.session.commit()
+
+        flash("Job Updated Successfully!")
+
+        return redirect(url_for("jobs"))
+
+    return render_template(
+        "edit_job.html",
+        job=job
+    )
 # -------------------------------
 # Logout
 # -------------------------------
