@@ -315,6 +315,28 @@ def apply(job_id):
     flash("Application Submitted Successfully!")
 
     return redirect(url_for("jobs"))
+
+# -------------------------------
+# My Applications
+# -------------------------------
+
+@app.route("/my_applications")
+def my_applications():
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    applications = (
+        db.session.query(Job)
+        .join(Application, Job.id == Application.job_id)
+        .filter(Application.user_id == session["user_id"])
+        .all()
+    )
+
+    return render_template(
+        "my_applications.html",
+        applications=applications
+    )
 # -------------------------------
 # Logout
 # -------------------------------

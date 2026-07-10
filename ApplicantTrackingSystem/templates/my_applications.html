@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>My Applications</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<nav>
+
+    <h2>Applicant Tracking System</h2>
+
+    <ul>
+
+        <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+
+        <li><a href="{{ url_for('jobs') }}">Jobs</a></li>
+
+        <li><a href="{{ url_for('logout') }}">Logout</a></li>
+
+    </ul>
+
+</nav>
+
+<div class="container">
+
+<h1>My Applications</h1>
+
+{% if applications %}
+
+    {% for job in applications %}
+
+    <div class="card">
+
+        <h2>{{ job.title }}</h2>
+
+        <p><strong>Company:</strong> {{ job.company }}</p>
+
+        <p><strong>Location:</strong> {{ job.location }}</p>
+
+        <p><strong>Salary:</strong> {{ job.salary }}</p>
+
+        <p>{{ job.description }}</p>
+
+    </div>
+
+    <br>
+
+    {% endfor %}
+
+{% else %}
+
+<h3>No applications found.</h3>
+
+{% endif %}
+
+</div>
+
+</body>
+
+</html>
