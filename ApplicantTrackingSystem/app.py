@@ -369,6 +369,26 @@ def edit_job(job_id):
         "edit_job.html",
         job=job
     )
+
+# -------------------------------
+# Delete Job
+# -------------------------------
+
+@app.route("/delete_job/<int:job_id>")
+def delete_job(job_id):
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    job = Job.query.get_or_404(job_id)
+
+    db.session.delete(job)
+
+    db.session.commit()
+
+    flash("Job Deleted Successfully!")
+
+    return redirect(url_for("jobs"))
 # -------------------------------
 # Logout
 # -------------------------------
