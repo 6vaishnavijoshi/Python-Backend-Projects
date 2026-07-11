@@ -25,6 +25,42 @@ href="{{ url_for('static', filename='style.css') }}">
 
 <h1>Welcome {{ username }}</h1>
 
+<div class="stats">
+
+    <div class="card">
+
+        <h2>Total Users</h2>
+
+        <h1>{{ total_users }}</h1>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Total Jobs</h2>
+
+        <h1>{{ total_jobs }}</h1>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Total Applications</h2>
+
+        <h1>{{ total_applications }}</h1>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Uploaded Resumes</h2>
+
+        <h1>{{ total_resumes }}</h1>
+
+    </div>
+
+</div>
+
 <p>You have successfully logged in.</p>
 
 <a href="/upload">

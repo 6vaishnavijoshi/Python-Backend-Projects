@@ -173,24 +173,7 @@ def login():
 
     return render_template("login.html")
 
-# -------------------------------
-# Dashboard
-# -------------------------------
 
-@app.route("/dashboard")
-def dashboard():
-
-    if "user_id" not in session:
-
-        return redirect(url_for("login"))
-
-    files = os.listdir(app.config["UPLOAD_FOLDER"])
-
-    return render_template(
-        "dashboard.html",
-        name=session["user_name"],
-        files=files
-    )
 
 # -------------------------------
 # Upload Resume
@@ -389,6 +372,45 @@ def delete_job(job_id):
     flash("Job Deleted Successfully!")
 
     return redirect(url_for("jobs"))
+
+# -------------------------------
+# Dashboard
+# -------------------------------
+
+@app.route("/dashboard")
+def dashboard():
+
+    if "user_id" not in session:
+
+        return redirect(url_for("login"))
+
+    files = os.listdir(app.config["UPLOAD_FOLDER"])
+
+    total_users = User.query.count()
+
+    total_jobs = Job.query.count()
+
+    total_applications = Application.query.count()
+
+    total_resumes = len(files)
+
+    return render_template(
+
+        "dashboard.html",
+
+        name=session["user_name"],
+
+        files=files,
+
+        total_users=total_users,
+
+        total_jobs=total_jobs,
+
+        total_applications=total_applications,
+
+        total_resumes=total_resumes
+
+    )
 # -------------------------------
 # Logout
 # -------------------------------
