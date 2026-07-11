@@ -411,6 +411,31 @@ def dashboard():
         total_resumes=total_resumes
 
     )
+
+# -------------------------------
+# View Applicants
+# -------------------------------
+
+@app.route("/applicants/<int:job_id>")
+def applicants(job_id):
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    job = Job.query.get_or_404(job_id)
+
+    applicants = (
+        db.session.query(User)
+        .join(Application, User.id == Application.user_id)
+        .filter(Application.job_id == job_id)
+        .all()
+    )
+
+    return render_template(
+        "applicants.html",
+        applicants=applicants,
+        job=job
+    )
 # -------------------------------
 # Logout
 # -------------------------------
@@ -425,7 +450,7 @@ def logout():
 # -------------------------------
 # Run Application
 # -------------------------------
-
+print(app.url_map)
 if __name__ == "__main__":
 
     app.run(debug=True)

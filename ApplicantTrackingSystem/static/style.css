@@ -45,3 +45,47 @@ button{
 button:hover{
     background:#163b5c;
 }
+
+.stats{
+
+display:flex;
+
+flex-wrap:wrap;
+
+gap:20px;
+
+margin-top:30px;
+
+margin-bottom:30px;
+
+}
+
+.card{
+
+background:white;
+
+padding:20px;
+
+border-radius:10px;
+
+box-shadow:0 4px 8px rgba(0,0,0,0.2);
+
+width:220px;
+
+text-align:center;
+
+}
+
+.card h1{
+
+font-size:40px;
+
+color:#007BFF;
+
+}
+
+.card h2{
+
+font-size:20px;
+
+}
