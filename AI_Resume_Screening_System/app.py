@@ -1,5 +1,19 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import (
+    Flask,
+    render_template,
+    request,
+    redirect,
+    url_for,
+    session,
+    flash
+)
+
 from flask_sqlalchemy import SQLAlchemy
+
+from werkzeug.security import (
+    generate_password_hash,
+    check_password_hash
+)
 
 # -------------------------------
 # Flask Configuration
@@ -57,14 +71,24 @@ def register():
         email = request.form["email"]
         password = request.form["password"]
 
+        existing_user = User.query.filter_by(email=email).first()
+
+        if existing_user:
+            flash("Email already registered.")
+            return redirect(url_for("register"))
+
+        hashed_password = generate_password_hash(password)
+
         user = User(
             name=name,
             email=email,
-            password=password
+            password=hashed_password
         )
 
         db.session.add(user)
         db.session.commit()
+
+        flash("Registration Successful!")
 
         return redirect(url_for("login"))
 
@@ -74,10 +98,61 @@ def register():
 # Login Page
 # -------------------------------
 
-@app.route("/login")
+@app.route("/login", methods=["GET", "POST"])
 def login():
+
+    if request.method == "POST":
+
+        email = request.form.get("email")
+        password = request.form.get("password")
+
+        print("Email:", email)
+
+        user = User.query.filter_by(email=email).first()
+
+        if user:
+            print("User Found")
+        else:
+            print("User Not Found")
+
+        if user and check_password_hash(user.password, password):
+
+            print("Password Correct")
+
+            session["user_id"] = user.id
+            session["user_name"] = user.name
+
+            return redirect(url_for("dashboard"))
+
+        else:
+
+            print("Wrong Password")
+
+            flash("Invalid Email or Password")
+
     return render_template("login.html")
 
+
+       #----------------------------------
+@app.route("/logout")
+def logout():
+
+    session.clear()
+
+    flash("Logged Out Successfully!")
+
+    return redirect(url_for("login"))
+
+@app.route("/dashboard")
+def dashboard():
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    return render_template(
+        "dashboard.html",
+        name=session["user_name"]
+    )
 # -------------------------------
 # Run Flask App
 # -------------------------------
