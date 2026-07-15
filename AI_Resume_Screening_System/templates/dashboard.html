@@ -21,8 +21,32 @@ href="{{ url_for('static', filename='style.css') }}">
 
 <br>
 
+<h2>Uploaded Resumes</h2>
+
+{% if files %}
+
+<ul>
+
+{% for file in files %}
+
+<li>{{ file }}</li>
+
+{% endfor %}
+
+</ul>
+
+{% else %}
+
+<p>No resumes uploaded yet.</p>
+
+{% endif %}
+
 <a href="/logout">
 <button>Logout</button>
+</a>
+
+<a href="{{ url_for('upload') }}">
+<button>Upload Resume</button>
 </a>
 
 </div>

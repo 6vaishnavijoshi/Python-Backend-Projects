@@ -1,3 +1,5 @@
+import os
+
 from flask import (
     Flask,
     render_template,
@@ -15,6 +17,8 @@ from werkzeug.security import (
     check_password_hash
 )
 
+from werkzeug.utils import secure_filename
+
 # -------------------------------
 # Flask Configuration
 # -------------------------------
@@ -22,10 +26,15 @@ from werkzeug.security import (
 app = Flask(__name__)
 
 app.config["SECRET_KEY"] = "mysecretkey"
-
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
-
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+UPLOAD_FOLDER = "uploads"
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
+ALLOWED_EXTENSIONS = {"pdf"}
+
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 db = SQLAlchemy(app)
 
@@ -36,12 +45,10 @@ db = SQLAlchemy(app)
 class User(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
-
     name = db.Column(db.String(100), nullable=False)
-
     email = db.Column(db.String(100), unique=True, nullable=False)
-
     password = db.Column(db.String(200), nullable=False)
+
 
 # -------------------------------
 # Create Database
@@ -51,7 +58,17 @@ with app.app_context():
     db.create_all()
 
 # -------------------------------
-# Home Page
+# Helper Function
+# -------------------------------
+
+def allowed_file(filename):
+    return (
+        "." in filename and
+        filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+    )
+
+# -------------------------------
+# Home
 # -------------------------------
 
 @app.route("/")
@@ -95,7 +112,7 @@ def register():
     return render_template("register.html")
 
 # -------------------------------
-# Login Page
+# Login
 # -------------------------------
 
 @app.route("/login", methods=["GET", "POST"])
@@ -106,34 +123,84 @@ def login():
         email = request.form.get("email")
         password = request.form.get("password")
 
-        print("Email:", email)
-
         user = User.query.filter_by(email=email).first()
 
-        if user:
-            print("User Found")
-        else:
-            print("User Not Found")
-
         if user and check_password_hash(user.password, password):
-
-            print("Password Correct")
 
             session["user_id"] = user.id
             session["user_name"] = user.name
 
+            flash("Login Successful!")
+
             return redirect(url_for("dashboard"))
 
-        else:
-
-            print("Wrong Password")
-
-            flash("Invalid Email or Password")
+        flash("Invalid Email or Password")
 
     return render_template("login.html")
 
+# -------------------------------
+# Dashboard
+# -------------------------------
 
-       #----------------------------------
+@app.route("/dashboard")
+def dashboard():
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    files = os.listdir(app.config["UPLOAD_FOLDER"])
+
+    return render_template(
+        "dashboard.html",
+        name=session["user_name"],
+        files=files
+    )
+
+# -------------------------------
+# Upload Resume
+# -------------------------------
+
+@app.route("/upload", methods=["GET", "POST"])
+def upload():
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    if request.method == "POST":
+
+        if "resume" not in request.files:
+            flash("No file selected")
+            return redirect(request.url)
+
+        file = request.files["resume"]
+
+        if file.filename == "":
+            flash("No file selected")
+            return redirect(request.url)
+
+        if file and allowed_file(file.filename):
+
+            filename = secure_filename(file.filename)
+
+            file.save(
+                os.path.join(
+                    app.config["UPLOAD_FOLDER"],
+                    filename
+                )
+            )
+
+            flash("Resume Uploaded Successfully!")
+
+            return redirect(url_for("dashboard"))
+
+        flash("Only PDF files are allowed.")
+
+    return render_template("upload_resume.html")
+
+# -------------------------------
+# Logout
+# -------------------------------
+
 @app.route("/logout")
 def logout():
 
@@ -143,18 +210,8 @@ def logout():
 
     return redirect(url_for("login"))
 
-@app.route("/dashboard")
-def dashboard():
-
-    if "user_id" not in session:
-        return redirect(url_for("login"))
-
-    return render_template(
-        "dashboard.html",
-        name=session["user_name"]
-    )
 # -------------------------------
-# Run Flask App
+# Run Flask
 # -------------------------------
 
 if __name__ == "__main__":
