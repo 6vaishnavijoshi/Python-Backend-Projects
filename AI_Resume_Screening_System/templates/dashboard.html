@@ -17,6 +17,43 @@ href="{{ url_for('static', filename='style.css') }}">
 
 <h2>Welcome {{ name }}</h2>
 
+<h2>Uploaded Resumes</h2>
+
+{% if files %}
+
+<table border="1" cellpadding="10">
+
+<tr>
+    <th>Resume</th>
+    <th>Download</th>
+</tr>
+
+{% for file in files %}
+
+<tr>
+
+<td>{{ file }}</td>
+
+<td>
+
+<a href="{{ url_for('download', filename=file) }}">
+<button>Download</button>
+</a>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+{% else %}
+
+<p>No resumes uploaded.</p>
+
+{% endif %}
+
 <p>You have successfully logged in.</p>
 
 <br>
@@ -48,6 +85,28 @@ href="{{ url_for('static', filename='style.css') }}">
 <a href="{{ url_for('upload') }}">
 <button>Upload Resume</button>
 </a>
+
+<td>
+
+<a href="{{ url_for('view_resume', filename=file) }}"
+target="_blank">
+
+<button>View</button>
+
+</a>
+
+</td>
+
+<td>
+
+<a href="{{ url_for('delete_resume', filename=file) }}"
+onclick="return confirm('Delete this resume?')">
+
+<button>Delete</button>
+
+</a>
+
+</td>
 
 </div>
 

@@ -7,7 +7,8 @@ from flask import (
     redirect,
     url_for,
     session,
-    flash
+    flash,
+    send_from_directory
 )
 
 from flask_sqlalchemy import SQLAlchemy
@@ -155,7 +156,6 @@ def dashboard():
         name=session["user_name"],
         files=files
     )
-
 # -------------------------------
 # Upload Resume
 # -------------------------------
@@ -197,6 +197,21 @@ def upload():
 
     return render_template("upload_resume.html")
 
+    #--------------------------------
+    #Download Route
+    #-------------------------------
+@app.route("/download/<filename>")
+def download(filename):
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    return send_from_directory(
+        app.config["UPLOAD_FOLDER"],
+        filename,
+        as_attachment=True
+    )
+
 # -------------------------------
 # Logout
 # -------------------------------
@@ -209,6 +224,42 @@ def logout():
     flash("Logged Out Successfully!")
 
     return redirect(url_for("login"))
+
+
+#--------------------------
+#View Route
+#---------------------------
+@app.route("/view/<filename>")
+def view_resume(filename):
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    return send_from_directory(
+        app.config["UPLOAD_FOLDER"],
+        filename
+    )
+
+#-------------------------------
+#Delete Route
+#-------------------------------
+@app.route("/delete_resume/<filename>")
+def delete_resume(filename):
+
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    path = os.path.join(
+        app.config["UPLOAD_FOLDER"],
+        filename
+    )
+
+    if os.path.exists(path):
+        os.remove(path)
+
+    flash("Resume Deleted")
+
+    return redirect(url_for("dashboard"))
 
 # -------------------------------
 # Run Flask
