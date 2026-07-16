@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Resume Analysis</title>
+
+</head>
+
+<body>
+
+<h1>Resume Analysis</h1>
+
+<h3>Resume</h3>
+
+<p>{{ filename }}</p>
+
+<h3>Email</h3>
+
+<p>{{ email }}</p>
+
+<h3>Phone</h3>
+
+<p>{{ phone }}</p>
+
+<h2>Matched Skills</h2>
+
+<ul>
+{% for skill in matched %}
+    <li>{{ skill }}</li>
+{% endfor %}
+</ul>
+
+<h2>Matching Percentage</h2>
+
+<p>{{ percentage }}%</p>
+
+<h2>Resume Score</h2>
+
+<p>{{ score }}/100</p>
+
+<h2>Status</h2>
+
+<h3>{{ status }}</h3>
+
+<h3>Skills</h3>
+
+<ul>
+
+{% for skill in skills %}
+
+<li>{{ skill }}</li>
+
+{% endfor %}
+
+</ul>
+
+</body>
+
+</html>

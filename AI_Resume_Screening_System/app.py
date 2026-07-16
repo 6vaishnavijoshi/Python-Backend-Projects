@@ -1,3 +1,8 @@
+from ai.parser import extract_text
+from ai.skills import extract_skills
+from ai.extract_email import extract_email
+from ai.extract_phone import extract_phone
+
 import os
 
 from flask import (
@@ -180,20 +185,75 @@ def upload():
 
         if file and allowed_file(file.filename):
 
+            # Secure filename
             filename = secure_filename(file.filename)
 
-            file.save(
-                os.path.join(
-                    app.config["UPLOAD_FOLDER"],
-                    filename
-                )
+            # Save PDF
+            filepath = os.path.join(
+                app.config["UPLOAD_FOLDER"],
+                filename
             )
+
+            file.save(filepath)
+
+            # -------------------------------
+            # AI Resume Parsing
+            # -------------------------------
+
+            text = extract_text(filepath)
+
+            email = extract_email(text)
+
+            phone = extract_phone(text)
+
+            skills = extract_skills(text)
+
+            # -------------------------------
+            # Day 7 - Resume Scoring
+            # -------------------------------
+
+            job_skills = [
+                "Python",
+                "Flask",
+                "SQL",
+                "HTML",
+                "CSS",
+                "JavaScript",
+                "React"
+            ]
+
+            matched = []
+
+            for skill in job_skills:
+                if skill in skills:
+                    matched.append(skill)
+
+            percentage = int((len(matched) / len(job_skills)) * 100)
+
+            score = min(100, percentage + 10)
+
+            if score >= 70:
+                status = "⭐ Shortlisted"
+            else:
+                status = "❌ Rejected"
 
             flash("Resume Uploaded Successfully!")
 
-            return redirect(url_for("dashboard"))
+            return render_template(
+                "resume_result.html",
+                filename=filename,
+                email=email,
+                phone=phone,
+                skills=skills,
+                matched=matched,
+                percentage=percentage,
+                score=score,
+                status=status,
+                text=text
+            )
 
-        flash("Only PDF files are allowed.")
+        else:
+            flash("Only PDF files are allowed.")
 
     return render_template("upload_resume.html")
 
@@ -260,6 +320,56 @@ def delete_resume(filename):
     flash("Resume Deleted")
 
     return redirect(url_for("dashboard"))
+
+
+#--------------------------------
+#job Match Route
+#-------------------------------
+@app.route("/job_match", methods=["GET", "POST"])
+def job_match():
+
+    if "resume_skills" not in session:
+        flash("Please upload a resume first.")
+        return redirect(url_for("upload"))
+
+    if request.method == "POST":
+
+        required_skills = request.form["skills"]
+
+        required_skills = [
+            skill.strip().lower()
+            for skill in required_skills.split(",")
+        ]
+
+        resume_skills = [
+            skill.lower()
+            for skill in session["resume_skills"]
+        ]
+
+        matched = []
+
+        missing = []
+
+        for skill in required_skills:
+
+            if skill in resume_skills:
+                matched.append(skill)
+
+            else:
+                missing.append(skill)
+
+        percentage = int(
+            (len(matched) / len(required_skills)) * 100
+        )
+
+        return render_template(
+            "match_result.html",
+            matched=matched,
+            missing=missing,
+            percentage=percentage
+        )
+
+    return render_template("job_match.html")
 
 # -------------------------------
 # Run Flask

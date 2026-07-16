@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Match Result</title>
+</head>
+
+<body>
+
+<h1>Resume Matching Result</h1>
+
+<h2>Job Match Percentage</h2>
+
+<h1>{{ percentage }}%</h1>
+
+<h2>Matched Skills</h2>
+
+<ul>
+
+{% for skill in matched %}
+
+<li>{{ skill }}</li>
+
+{% endfor %}
+
+</ul>
+
+<h2>Missing Skills</h2>
+
+<ul>
+
+{% for skill in missing %}
+
+<li>{{ skill }}</li>
+
+{% endfor %}
+
+</ul>
+
+</body>
+</html>
