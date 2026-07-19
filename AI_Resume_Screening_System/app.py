@@ -380,6 +380,35 @@ def job_match():
 
     return render_template("job_match.html")
 
+
+#--------------------------------
+#add_job Route
+#---------------------------------
+@app.route("/add_job", methods=["GET", "POST"])
+def add_job():
+
+    if request.method == "POST":
+
+        job = Job(
+
+            title=request.form["title"],
+
+            company=request.form["company"],
+
+            skills=request.form["skills"]
+
+        )
+
+        db.session.add(job)
+
+        db.session.commit()
+
+        flash("Job Added Successfully!")
+
+        return redirect(url_for("jobs"))
+
+    return render_template("add_job.html")
+
 # -------------------------------
 # Run Flask
 # -------------------------------
